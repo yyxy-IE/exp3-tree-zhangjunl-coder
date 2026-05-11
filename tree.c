@@ -1,10 +1,10 @@
 /**
- * å®éªŒï¼šç›®å½•æ ‘æŸ¥çœ‹å™¨ï¼ˆä»¿ Linux tree å‘½ä»¤ï¼‰
- * å­¦å·ï¼š__________  å§“åï¼š__________
- * è¯´æ˜ï¼šè¯·è¡¥å…¨æ‰€æœ‰æ ‡è®°ä¸º TODO çš„å‡½æ•°ä½“ï¼Œä¸è¦ä¿®æ”¹å…¶ä»–ä»£ç ã€‚
- * ç›®å½•æ ‘æŸ¥çœ‹å™¨ï¼ˆä»¿ Linux tree å‘½ä»¤ï¼‰
- * å®Œæ•´å®ç°ç‰ˆæœ¬ï¼ˆCè¯­è¨€ï¼Œå·¦å­©å­å³å…„å¼ŸäºŒå‰æ ‘ï¼‰
- * ç¼–è¯‘ï¼šgcc -o tree tree.c -std=c99
+ * ÊµÑé£ºÄ¿Â¼Ê÷²é¿´Æ÷£¨·Â Linux tree ÃüÁî£©
+ * Ñ§ºÅ£º2504020454  ĞÕÃû£ºÕÅ¿¡Á¼
+ * ËµÃ÷£ºÇë²¹È«ËùÓĞ±ê¼ÇÎª TODO µÄº¯ÊıÌå£¬²»ÒªĞŞ¸ÄÆäËû´úÂë¡£
+ * Ä¿Â¼Ê÷²é¿´Æ÷£¨·Â Linux tree ÃüÁî£©
+ * ÍêÕûÊµÏÖ°æ±¾£¨CÓïÑÔ£¬×óº¢×ÓÓÒĞÖµÜ¶ş²æÊ÷£©
+ * ±àÒë£ºgcc -o tree tree.c -std=c99
  */
 
 #include <stdio.h>
@@ -15,15 +15,15 @@
 #include <unistd.h>
 #include <errno.h>
 
-// ================== äºŒå‰æ ‘ç»“ç‚¹å®šä¹‰ ==================
+// ================== ¶ş²æÊ÷½áµã¶¨Òå ==================
 typedef struct FileNode {
-    char *name;                  // æ–‡ä»¶/ç›®å½•å
-    int isDir;                   // 1:ç›®å½• 0:æ–‡ä»¶
-    struct FileNode *firstChild; // å·¦å­©å­ï¼šç¬¬ä¸€ä¸ªå­é¡¹
-    struct FileNode *nextSibling;// å³å…„å¼Ÿï¼šä¸‹ä¸€ä¸ªåŒå±‚é¡¹
+    char *name;                  // ÎÄ¼ş/Ä¿Â¼Ãû
+    int isDir;                   // 1:Ä¿Â¼ 0:ÎÄ¼ş
+    struct FileNode *firstChild; // ×óº¢×Ó£ºµÚÒ»¸ö×ÓÏî
+    struct FileNode *nextSibling;// ÓÒĞÖµÜ£ºÏÂÒ»¸öÍ¬²ãÏî
 } FileNode;
 
-// ================== å‡½æ•°å£°æ˜ ==================
+// ================== º¯ÊıÉùÃ÷ ==================
 FileNode* createNode(const char *name, int isDir);
 int cmpNode(const void *a, const void *b);
 FileNode* buildTree(const char *path);
@@ -35,88 +35,219 @@ void countDirFile(FileNode *root, int *dirs, int *files);
 void freeTree(FileNode *root);
 char* getBaseName(void);
 
-// ================== éœ€è¦è¡¥å…¨çš„å‡½æ•° ==================
+// ================== ĞèÒª²¹È«µÄº¯Êı ==================
 
-// åˆ›å»ºæ–°ç»“ç‚¹ï¼ˆåˆ†é…å†…å­˜ã€å¤åˆ¶å­—ç¬¦ä¸²ã€åˆå§‹åŒ–æŒ‡é’ˆï¼‰
+// ´´½¨ĞÂ½áµã£¨·ÖÅäÄÚ´æ¡¢¸´ÖÆ×Ö·û´®¡¢³õÊ¼»¯Ö¸Õë£©
 FileNode* createNode(const char *name, int isDir) {
-    // TODO: å®ç°
+    FileNode* node = (FileNode *)malloc(sizeof(FileNode));
+    if(!node){
+        perror("malloc");
+    // TODO: ÊµÏÖ
     return NULL;
+    }
+    node->name = strdup(name); 
+    if (!node->name) {
+        perror("strdup");
+        free(node);
+        return NULL;
+    }
+    node->isDir = isDir;
+    node->firstChild = NULL;
+    node->nextSibling = NULL;
+    return node;
 }
 
-// æ¯”è¾ƒå‡½æ•°ï¼Œç”¨äº qsort å¯¹å­é¡¹æŒ‰åç§°æ’åº
+// ±È½Ïº¯Êı£¬ÓÃÓÚ qsort ¶Ô×ÓÏî°´Ãû³ÆÅÅĞò
 int cmpNode(const void *a, const void *b) {
-    // TODO: å®ç°
-    return 0;
+    FileNode *nodeA = *(FileNode **)a;
+    FileNode *nodeB = *(FileNode **)b;
+    return strcmp(nodeA->name, nodeB->name);
 }
+    // TODO: ÊµÏÖ
+    
 
-// é€’å½’æ„å»ºç›®å½•æ ‘ï¼ˆæ ¸å¿ƒéš¾ç‚¹ï¼‰
+
+// µİ¹é¹¹½¨Ä¿Â¼Ê÷£¨ºËĞÄÄÑµã£©
 FileNode* buildTree(const char *path) {
-    // TODO: å®ç°
-    // æ­¥éª¤æç¤ºï¼š
-    // 1. opendir æ‰“å¼€ç›®å½•ï¼Œå¤±è´¥è¿”å› NULL
-    // 2. ä» path ä¸­æå–æœ€åçš„ç›®å½•åä½œä¸ºå½“å‰ç»“ç‚¹åï¼ˆæ³¨æ„å¤„ç†æ ¹ç›®å½•"/"ï¼‰
-    // 3. åˆ›å»ºå½“å‰ç›®å½•ç»“ç‚¹
-    // 4. å¾ªç¯ readdirï¼Œè·³è¿‡ "." å’Œ ".."
-    // 5. æ‹¼æ¥å®Œæ•´è·¯å¾„ï¼Œç”¨ stat åˆ¤æ–­ç±»å‹
-    // 6. è‹¥æ˜¯ç›®å½•ï¼Œé€’å½’è°ƒç”¨ buildTreeï¼›è‹¥æ˜¯æ™®é€šæ–‡ä»¶ï¼Œè°ƒç”¨ createNode
-    // 7. å°†å¾—åˆ°çš„å­ç»“ç‚¹å­˜å…¥ä¸´æ—¶æ•°ç»„
-    // 8. å…³é—­ç›®å½•
-    // 9. å¯¹å­ç»“ç‚¹æ•°ç»„æ’åºï¼ˆè°ƒç”¨ qsort å’Œ cmpNodeï¼‰
-    // 10. å°†æ’åºåçš„å­ç»“ç‚¹é“¾æ¥æˆå…„å¼Ÿé“¾è¡¨ï¼ˆfirstChild æŒ‡å‘ç¬¬ä¸€ä¸ªï¼Œåç»­ nextSiblingï¼‰
-    // 11. é‡Šæ”¾ä¸´æ—¶æ•°ç»„ï¼Œè¿”å›å½“å‰ç›®å½•ç»“ç‚¹
-    return NULL;
+      DIR *dir = opendir(path);
+    if (!dir) {
+        perror("opendir");
+        return NULL;
+    }
+
+    // ÌáÈ¡Ä¿Â¼Ãû×÷Îªµ±Ç°½áµãÃû
+    const char *baseName = strrchr(path, '/');
+    baseName = baseName ? baseName + 1 : path;
+
+    FileNode *node = createNode(baseName, 1);
+    if (!node) {
+        closedir(dir);
+        return NULL;
+    }
+
+    // ×Ó½áµã´æ´¢µ½ÁÙÊ±Êı×é
+    FileNode *children[1024];
+    int childCount = 0;
+
+    struct dirent *entry;
+    while ((entry = readdir(dir)) != NULL) {
+        // Ìø¹ı . ºÍ ..
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
+            continue;
+        }
+
+        // Æ´½ÓÍêÕûÂ·¾¶
+        char fullPath[1024];
+        snprintf(fullPath, sizeof(fullPath), "%s/%s", path, entry->d_name);
+
+        struct stat st;
+        if (stat(fullPath, &st) != 0) {
+            perror("stat");
+            continue;
+        }
+
+        if (S_ISDIR(st.st_mode)) {
+            FileNode *child = buildTree(fullPath);
+            if (child) {
+                children[childCount++] = child;
+            }
+        } else if (S_ISREG(st.st_mode)) {
+            FileNode *child = createNode(entry->d_name, 0);
+            if (child) {
+                children[childCount++] = child;
+            }
+        }
+    }
+    closedir(dir);
+
+    // ÅÅĞò×Ó½áµã
+    qsort(children, childCount, sizeof(FileNode *), cmpNode);
+
+    // ½¨Á¢ĞÖµÜÁ´±í
+    for (int i = 0; i < childCount; i++) {
+        if (i > 0) {
+            children[i - 1]->nextSibling = children[i];
+        }
+        if (i == 0) {
+            node->firstChild = children[i];
+        }
+    }
+
+    return node;
 }
 
-// æ ‘å½¢è¾“å‡ºï¼ˆä»¿ tree å‘½ä»¤ï¼‰
+    // TODO: ÊµÏÖ
+    // ²½ÖèÌáÊ¾£º
+    // 1. opendir ´ò¿ªÄ¿Â¼£¬Ê§°Ü·µ»Ø NULL
+    // 2. ´Ó path ÖĞÌáÈ¡×îºóµÄÄ¿Â¼Ãû×÷Îªµ±Ç°½áµãÃû£¨×¢Òâ´¦Àí¸ùÄ¿Â¼"/"£©
+    // 3. ´´½¨µ±Ç°Ä¿Â¼½áµã
+    // 4. Ñ­»· readdir£¬Ìø¹ı "." ºÍ ".."
+    // 5. Æ´½ÓÍêÕûÂ·¾¶£¬ÓÃ stat ÅĞ¶ÏÀàĞÍ
+    // 6. ÈôÊÇÄ¿Â¼£¬µİ¹éµ÷ÓÃ buildTree£»ÈôÊÇÆÕÍ¨ÎÄ¼ş£¬µ÷ÓÃ createNode
+    // 7. ½«µÃµ½µÄ×Ó½áµã´æÈëÁÙÊ±Êı×é
+    // 8. ¹Ø±ÕÄ¿Â¼
+    // 9. ¶Ô×Ó½áµãÊı×éÅÅĞò£¨µ÷ÓÃ qsort ºÍ cmpNode£©
+    // 10. ½«ÅÅĞòºóµÄ×Ó½áµãÁ´½Ó³ÉĞÖµÜÁ´±í£¨firstChild Ö¸ÏòµÚÒ»¸ö£¬ºóĞø nextSibling£©
+    // 11. ÊÍ·ÅÁÙÊ±Êı×é£¬·µ»Øµ±Ç°Ä¿Â¼½áµã
+    // Ê÷ĞÎÊä³ö£¨·Â tree ÃüÁî£©
 void printTree(FileNode *node, const char *prefix, int isLast) {
-    // TODO: å®ç°
-    // æ­¥éª¤æç¤ºï¼š
-    // 1. å¦‚æœ node ä¸ºç©ºï¼Œè¿”å›
-    // 2. è¾“å‡ºå‰ç¼€ã€åˆ†æ”¯ç¬¦å·ï¼ˆisLast ? "`-- " : "|-- "ï¼‰ã€ç»“ç‚¹å
-    // 3. å¦‚æœæ˜¯ç›®å½•ï¼Œè¾“å‡º "/"
-    // 4. æ¢è¡Œ
-    // 5. å¦‚æœæ²¡æœ‰å­©å­ï¼Œè¿”å›
-    // 6. éå†å­©å­é“¾è¡¨ï¼Œå¯¹æ¯ä¸ªå­©å­ï¼š
-    //     è®¡ç®—æ–°å‰ç¼€ = prefix + (isLast ? "    " : "|   ")
-    //     åˆ¤æ–­æ˜¯å¦ä¸ºæœ€åä¸€ä¸ªå­©å­
-    //     é€’å½’è°ƒç”¨ printTree
+    if (!node) return;
+
+    printf("%s", prefix);
+    printf("%s", isLast ? "`-- " : "|-- ");
+    printf("%s", node->name);
+    if (node->isDir) printf("/");
+    printf("\n");
+
+    if (node->firstChild) {
+        char newPrefix[1024];
+        snprintf(newPrefix, sizeof(newPrefix), "%s%s", prefix, isLast ? "    " : "|   ");
+
+        FileNode *child = node->firstChild;
+        while (child) {
+            printTree(child, newPrefix, child->nextSibling == NULL);
+            child = child->nextSibling;
+        }
+    }
+    // TODO: ÊµÏÖ
+    // ²½ÖèÌáÊ¾£º
+    // 1. Èç¹û node Îª¿Õ£¬·µ»Ø
+    // 2. Êä³öÇ°×º¡¢·ÖÖ§·ûºÅ£¨isLast ? "`-- " : "|-- "£©¡¢½áµãÃû
+    // 3. Èç¹ûÊÇÄ¿Â¼£¬Êä³ö "/"
+    // 4. »»ĞĞ
+    // 5. Èç¹ûÃ»ÓĞº¢×Ó£¬·µ»Ø
+    // 6. ±éÀúº¢×ÓÁ´±í£¬¶ÔÃ¿¸öº¢×Ó£º
+    //     ¼ÆËãĞÂÇ°×º = prefix + (isLast ? "    " : "|   ")
+    //     ÅĞ¶ÏÊÇ·ñÎª×îºóÒ»¸öº¢×Ó
+    //     µİ¹éµ÷ÓÃ printTree
 }
 
-// ç»Ÿè®¡äºŒå‰æ ‘ç»“ç‚¹æ€»æ•°
+// Í³¼Æ¶ş²æÊ÷½áµã×ÜÊı
 int countNodes(FileNode *root) {
-    // TODO: å®ç°ï¼ˆé€’å½’ï¼‰
-    return 0;
+    if (!root) return 0;
+    return 1 + countNodes(root->firstChild) + countNodes(root->nextSibling);
 }
+    // TODO: ÊµÏÖ£¨µİ¹é£©
 
-// ç»Ÿè®¡å¶å­ç»“ç‚¹æ•°ï¼ˆfirstChild == NULL çš„ç»“ç‚¹ï¼‰
+
+
+// Í³¼ÆÒ¶×Ó½áµãÊı£¨firstChild == NULL µÄ½áµã£©
 int countLeaves(FileNode *root) {
-    // TODO: å®ç°ï¼ˆé€’å½’ï¼‰
-    return 0;
+    if (!root) return 0;
+    if (!root->firstChild) return 1;
+    return countLeaves(root->firstChild) + countLeaves(root->nextSibling);
 }
-
-// è®¡ç®—äºŒå‰æ ‘é«˜åº¦ï¼ˆæ ¹æ·±åº¦ä¸º1ï¼Œç©ºæ ‘é«˜åº¦ä¸º0ï¼‰
+    // TODO: ÊµÏÖ£¨µİ¹é£©
+    // ¼ÆËã¶ş²æÊ÷¸ß¶È£¨¸ùÉî¶ÈÎª1£¬¿ÕÊ÷¸ß¶ÈÎª0£©
 int treeHeight(FileNode *root) {
-    // TODO: å®ç°ï¼ˆé€’å½’ï¼‰
-    return 0;
+    if (!root) return 0;
+    int childHeight = treeHeight(root->firstChild);
+    int siblingHeight = treeHeight(root->nextSibling);
+    return 1 + (childHeight > siblingHeight ? childHeight : siblingHeight);
 }
+    // TODO: ÊµÏÖ£¨µİ¹é£©
 
-// ç»Ÿè®¡ç›®å½•æ•°å’Œæ–‡ä»¶æ•°ï¼ˆéå†æ•´æ£µæ ‘ï¼‰
+
+
+// Í³¼ÆÄ¿Â¼ÊıºÍÎÄ¼şÊı£¨±éÀúÕû¿ÃÊ÷£©
 void countDirFile(FileNode *root, int *dirs, int *files) {
-    // TODO: å®ç°ï¼ˆé€’å½’ï¼‰
+    if (!root) return;
+    if (root->isDir) (*dirs)++;
+    else (*files)++;
+
+    countDirFile(root->firstChild, dirs, files);
+    countDirFile(root->nextSibling, dirs, files);
+    // TODO: ÊµÏÖ£¨µİ¹é£©
 }
 
-// é‡Šæ”¾æ•´æ£µæ ‘çš„å†…å­˜
+// ÊÍ·ÅÕû¿ÃÊ÷µÄÄÚ´æ
 void freeTree(FileNode *root) {
-    // TODO: å®ç°ï¼ˆé€’å½’é‡Šæ”¾å·¦å³å­æ ‘ï¼Œæœ€åé‡Šæ”¾å½“å‰ç»“ç‚¹ï¼‰
+     if (!root) return;
+    freeTree(root->firstChild);
+    freeTree(root->nextSibling);
+    free(root->name);
+    free(root);
+    // TODO: ÊµÏÖ£¨µİ¹éÊÍ·Å×óÓÒ×ÓÊ÷£¬×îºóÊÍ·Åµ±Ç°½áµã£©
 }
 
-// è·å–å½“å‰å·¥ä½œç›®å½•çš„â€œåŸºæœ¬åç§°â€ï¼ˆç”¨äºæ˜¾ç¤ºæ ¹ç»“ç‚¹åï¼‰
+// »ñÈ¡µ±Ç°¹¤×÷Ä¿Â¼µÄ¡°»ù±¾Ãû³Æ¡±£¨ÓÃÓÚÏÔÊ¾¸ù½áµãÃû£©
 char* getBaseName(void) {
-    // TODO: å®ç°
-    // æç¤ºï¼šè°ƒç”¨ getcwd(NULL,0) è·å–ç»å¯¹è·¯å¾„ï¼Œæå–æœ€åä¸€ä¸ª '/' ä¹‹åçš„éƒ¨åˆ†
-    // æ³¨æ„é‡Šæ”¾ getcwd åˆ†é…çš„å†…å­˜
-    return NULL;
-}
+    char *cwd = getcwd(NULL, 0);
+    if (!cwd) {
+        perror("getcwd");
+        return NULL;
+    }
+    char *baseName = strrchr(cwd, '/');
+    if (baseName) baseName++;
+    else baseName = cwd;
+
+    char *result = strdup(baseName);
+    free(cwd);
+    return result;
+    // TODO: ÊµÏÖ
+    // ÌáÊ¾£ºµ÷ÓÃ getcwd(NULL,0) »ñÈ¡¾ø¶ÔÂ·¾¶£¬ÌáÈ¡×îºóÒ»¸ö '/' Ö®ºóµÄ²¿·Ö
+    // ×¢ÒâÊÍ·Å getcwd ·ÖÅäµÄÄÚ´æ
+ }
 
 int main(int argc, char *argv[]) {
     char targetPath[1024];
@@ -140,17 +271,17 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     if (!S_ISDIR(st.st_mode)) {
-        fprintf(stderr, "é”™è¯¯: %s ä¸æ˜¯ç›®å½•\n", targetPath);
+        fprintf(stderr, "´íÎó: %s ²»ÊÇÄ¿Â¼\n", targetPath);
         return 1;
     }
 
     FileNode *root = buildTree(targetPath);
     if (!root) {
-        fprintf(stderr, "æ— æ³•æ„å»ºç›®å½•æ ‘\n");
+        fprintf(stderr, "ÎŞ·¨¹¹½¨Ä¿Â¼Ê÷\n");
         return 1;
     }
 
-    // è¾“å‡ºæ ¹ç›®å½•å
+    // Êä³ö¸ùÄ¿Â¼Ãû
     char *displayName = NULL;
     if (argc >= 2) {
         displayName = root->name;
@@ -173,10 +304,10 @@ int main(int argc, char *argv[]) {
 
     int dirs = 0, files = 0;
     countDirFile(root, &dirs, &files);
-    printf("\n%d ä¸ªç›®å½•, %d ä¸ªæ–‡ä»¶\n", dirs, files);
-    printf("äºŒå‰æ ‘ç»“ç‚¹æ€»æ•°: %d\n", countNodes(root));
-    printf("å¶å­ç»“ç‚¹æ•°: %d\n", countLeaves(root));
-    printf("æ ‘çš„é«˜åº¦: %d\n", treeHeight(root));
+    printf("\n%d ¸öÄ¿Â¼, %d ¸öÎÄ¼ş\n", dirs, files);
+    printf("¶ş²æÊ÷½áµã×ÜÊı: %d\n", countNodes(root));
+    printf("Ò¶×Ó½áµãÊı: %d\n", countLeaves(root));
+    printf("Ê÷µÄ¸ß¶È: %d\n", treeHeight(root));
 
     freeTree(root);
     return 0;
